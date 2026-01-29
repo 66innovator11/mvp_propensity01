@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, Container, List, ListItem, ListItemIcon, ListItemText, IconButton, TextField, Chip, LinearProgress } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -9,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 type UploadStatus = 'initial' | 'review' | 'predictors';
 
 const FileUploadCard: React.FC = () => {
+  const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -38,36 +40,83 @@ const FileUploadCard: React.FC = () => {
     
     setIsUploading(true);
     try {
-      // Create FormData for multipart upload
+      // Map uploaded filenames to expected backend form fields
       const formData = new FormData();
       files.forEach((file) => {
-        formData.append('files', file);
+        const name = file.name.toLowerCase();
+        if (name.includes('profile') || name.includes('customer_profile')) {
+          formData.append('customer_profile', file, file.name);
+        } else if (name.includes('product') || name.includes('insurance')) {
+          formData.append('insurance_products', file, file.name);
+        } else if (name.includes('transaction')) {
+          formData.append('transactions', file, file.name);
+        } else {
+          // fallback to customer_events
+          formData.append('customer_events', file, file.name);
+        }
       });
 
-      console.log(`📤 Uploading ${files.length} file(s)...`);
+      // Ensure at least one transactions file exists
+      if (!formData.has('transactions') && files.length > 0) {
+        formData.append('transactions', files[0], files[0].name);
+      }
 
-      // Upload to backend API which will handle GCP upload
-      const response = await fetch('http://localhost:3001/api/upload', {
+      console.log(`📤 Uploading ${files.length} file(s) to API...`);
+
+      // Upload to FastAPI backend
+      const uploadResp = await fetch('http://localhost:8000/upload-data', {
         method: 'POST',
         body: formData,
       });
 
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          errorData = { details: `HTTP ${response.status}: ${response.statusText}` };
-        }
-        throw new Error(errorData.details || errorData.error || 'Upload failed');
+      if (!uploadResp.ok) {
+        const err = await uploadResp.text();
+        throw new Error(`Upload failed: ${err}`);
       }
 
-      const data = await response.json();
-      console.log('✓ Upload response:', data);
-      
-      // Show success message and move to review
-      alert(`✓ Successfully uploaded ${files.length} file(s) to GCP Cloud Storage!`);
+      const uploadData = await uploadResp.json();
+      console.log('✓ Upload response:', uploadData);
+
+      const uploadDir = uploadData.data?.upload_dir;
+      if (!uploadDir) throw new Error('Upload succeeded but upload_dir not returned');
+
+      // Start clustering using the uploaded directory
+      const startResp = await fetch('http://localhost:8000/clustering/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ k_min: 2, k_max: 8, random_state: 42, data_dir: uploadDir })
+      });
+
+      if (!startResp.ok) {
+        const err = await startResp.text();
+        throw new Error(`Failed to start clustering: ${err}`);
+      }
+
+      const startData = await startResp.json();
+      const jobId = startData.data?.job_id;
+      if (!jobId) throw new Error('Clustering job failed to start (no job_id)');
+
+      // Poll job status until completed
+      let jobStatus = null;
+      while (true) {
+        await new Promise((r) => setTimeout(r, 2000));
+        const statusResp = await fetch(`http://localhost:8000/jobs/${jobId}`);
+        if (!statusResp.ok) throw new Error('Failed to fetch job status');
+        const statusData = await statusResp.json();
+        jobStatus = statusData;
+        if (jobStatus.status === 'completed') break;
+        if (jobStatus.status === 'failed') throw new Error('Clustering job failed: ' + (jobStatus.error || jobStatus.message));
+      }
+
+      // Retrieve clustering results
+      const resultsResp = await fetch('http://localhost:8000/results/clustering');
+      if (!resultsResp.ok) throw new Error('Failed to fetch clustering results');
+      const resultsData = await resultsResp.json();
+
+      // Store results and navigate to clusters view
+      localStorage.setItem('clustering_results', JSON.stringify(resultsData.data || {}));
       setUploadStatus('review');
+      navigate('/clusters');
     } catch (error) {
       console.error('❌ Upload failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
