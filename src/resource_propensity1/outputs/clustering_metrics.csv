@@ -1,0 +1,8 @@
+scope,k,silhouette,n_customers
+product_agnostic,2,0.09500799274235523,5000
+product_wise::Annuity,2,0.08152788772026721,153
+product_wise::Critical Illness,2,0.07617193242911179,86
+product_wise::Endowment,2,0.08540072235254292,92
+product_wise::Term Life,3,0.0766580546184829,961
+product_wise::Unit-linked,2,0.08441973978385102,190
+product_wise::Whole Life,2,0.2457989742272552,378

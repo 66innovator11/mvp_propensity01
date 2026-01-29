@@ -1,0 +1,4 @@
+i want to run clustering algo on a data set that is merged from Customer data, Product data, general banking transactions data to discover groups in to which customers can be divided into, first agnostic of the product and second product wise.
+Customer data - CustomerID, Age, Gender, City, Postcode, Income Band, Credit Score, Policy Status, Beneficiary Product data - Policy ID, Customer ID, Product Coverage Amount, Premium Amount, Policy Term Years, Status, Policy Start Date, Policy Lapse Date, Beneficiary Relation Transaction data - Transaction ID, Customer ID, Transaction Date, Transaction Type, Amount, Merchant Category, Payment Method
+
+Pleas ask me for the three data files.
