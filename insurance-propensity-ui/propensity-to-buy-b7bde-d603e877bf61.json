@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "propensity-to-buy-b7bde",
+  "private_key_id": "d603e877bf6127f1b4c4f8045f2bcd72ed779d31",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCQOcLsNdlMlxgB\nDE0RYNVVIcg9s024xl/Ex0PkUBhxmsMkgIA/5x2aakg63AlUBigY+Gm8G7M27LrM\nfchuNDmIarslYbzjPoziFnPWsC6YZGUK8D+cDhIbJVpV9XY82IkpQiFUXphkfWkR\nUBYzmBdO0LbR77rdcqJSfTo4gGO1Mp3FkK/OO70sM652R1boJLB+HNUnVg/FgsvW\ndK2LvxDmuYks/eTybd6VryWNruqQkt7zSa0DQ31PdR7415jbWl5oE3JXxC+hvTJn\nQeTxwhmJBROnNnLpnvGEZV3n5ZGR3eDiuYSPEUZu0ZvEBFi0Xu8WGs4XjTa8TPeq\nr0SMc/GbAgMBAAECggEAMfiBa/xAXQQg4gQUE8hcQhHhYldkv3ekKPbttAZ4YaxA\nnr4TMZDvNdhLTHF+nelALV6sq+thDc+57S5LqrtXj8eDLjGOE6JRh+hFnIYQruZi\nCAcz0ushJNytTwksPWq9I1lxWN0pqe+13rTD7H5u3PT90wFf2mhki3YuHPOHGHl6\n/bocQvgE6hKCTUwdz/BN1shdSgSuKAmEey9EJp+S5JDCcUOQw1TdaUD36fcKar/E\nTtICAttWcNgODrT2OAV2oO2ZztMSCy5oOQstKK1f4kPg5LC7PJ4ANj+DWSpiiv0a\noy8E3Ofn1K8ey55NhcsFx8dZwHeKgmx/Z334wvQhgQKBgQDCKXlxvcF4yHr82RDY\nam+0dW3gRVnejh1BBge4LZXL50hNWNMCTPTHWIy92KHQd8jtlp9DLH01EKGLvjhk\nuETjm+ZuAFEdsatuKbn2qouBeNflmNGk3tfGJurksUN2qc1pxd3AswGbZOaCBEd7\n43J4CIoTYZHhLehSeCeUvzwj2wKBgQC+KNijQmhApUC2CSVeGZ1Vg99sRUxzRjbl\nR9IbA1zxqI6dIoiMxebBpROwyVKLuvyS72TaukURH9+js/yk1Swn31m11eaTAviN\nn62sjVT1wTFwkRY8nTbLtpd2sQ+rb4mQa3Qq0K1Q8898KcTmPXm2E8O9C/FydprU\nkjKKzQ+1QQKBgH3WeYJRNJI+hQ9Y88T/frRbo0HGUM+gFa+t49Tnnn1PwZl3pxKH\no+GLL3Rfcch1ygDKLSBRNjjtNXYna89DakqGIRtME0aGfw/f9Um8ELxyAKMqnz0W\nvIwNbxGXHZ1Lwfj6p5Ubrz/ybj733QibSfYnuq2DABQMN9UzUJvkMWsfAoGBALCq\nFgom6eAVJvd3q8WummMWLv3Rq+L0eo+sl+AM0c6ZQFVv/dh7C5UgHhkCELRMNdb0\nnYgvwXbVW9oknzUr7ufkMt4iKSKvgedhT+KdMy9WGu5vfG83x+6eZj0Y5mvpJa6M\nhdI5KKuqtzqtO4aD2o1z80ewztH+qn2OjXIybMOBAoGAMG8Oa5oTHICTypc7crR4\nPiKzQueSxQJDKfJ2HsczKs6MJXg7IDCnniOdDunpp7AKohGke6ZpmXhp3PbRWS9V\nDEoCuD5vxUvvfvlH+o5+jqNnU/41NbQ4sM7nZzav+2FdJZhaDVcidU7sN4Nvnf3J\nZ6H2zdbg5Ru1Ua2nf8p0tHc=\n-----END PRIVATE KEY-----\n",
+  "client_email": "bucket-uploader@propensity-to-buy-b7bde.iam.gserviceaccount.com",
+  "client_id": "102148883528617888134",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bucket-uploader%40propensity-to-buy-b7bde.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
