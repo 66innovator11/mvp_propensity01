@@ -1,5 +1,0 @@
-Target: whole_life_cluster0
-AUC: nan
-Precision@10%: 0.0000
-Training positives: 354 / 378
-Test customers: 4622

@@ -1,5 +1,0 @@
-Target: term_life_cluster1
-AUC: nan
-Precision@10%: 0.0000
-Training positives: 461 / 961
-Test customers: 4039
