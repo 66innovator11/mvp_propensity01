@@ -4,3 +4,7 @@ scikit-learn
 matplotlib
 xgboost
 requests
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic

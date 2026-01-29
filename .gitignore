@@ -1,5 +1,7 @@
 ### IntelliJ IDEA ###
 out/
+outputs
+.idea
 !**/src/main/**/out/
 !**/src/test/**/out/
 .kotlin
@@ -25,7 +27,6 @@ bin/
 
 ### VS Code ###
 .vscode/
-.idea
 
 ### Mac OS ###
 .DS_Store

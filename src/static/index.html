@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propensity Analysis Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <h1 class="text-3xl font-bold">Propensity Analysis Dashboard</h1>
+                <p class="text-blue-100 mt-2">Customer Clustering, Propensity Modeling & Personalized Outreach</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Status Section -->
+            <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">System Status</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-green-800">API Status</h3>
+                        <p id="api-status" class="text-green-600">Checking...</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-800">Active Jobs</h3>
+                        <p id="active-jobs" class="text-blue-600">0</p>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-purple-800">Last Updated</h3>
+                        <p id="last-updated" class="text-purple-600">Never</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Upload Section -->
+            <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Data Upload</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Customer Profile (CSV)</label>
+                        <input type="file" id="customer-profile" accept=".csv" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Insurance Products (CSV)</label>
+                        <input type="file" id="insurance-products" accept=".csv" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Transactions (CSV)</label>
+                        <input type="file" id="transactions" accept=".csv" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Customer Events (CSV, Optional)</label>
+                        <input type="file" id="customer-events" accept=".csv" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+                <button onclick="uploadData()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                    Upload Data
+                </button>
+                <div id="upload-status" class="mt-2"></div>
+            </section>
+
+            <!-- Analysis Controls -->
+            <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Analysis Controls</h2>
+                
+                <!-- Clustering -->
+                <div class="mb-6 p-4 border rounded">
+                    <h3 class="font-semibold mb-2">Customer Clustering</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Min Clusters</label>
+                            <input type="number" id="k-min" value="2" min="2" max="20" class="w-full p-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Clusters</label>
+                            <input type="number" id="k-max" value="10" min="2" max="20" class="w-full p-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Random State</label>
+                            <input type="number" id="random-state" value="42" class="w-full p-2 border rounded">
+                        </div>
+                    </div>
+                    <button onclick="startClustering()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        Start Clustering
+                    </button>
+                </div>
+
+                <!-- Model Training -->
+                <div class="mb-6 p-4 border rounded">
+                    <h3 class="font-semibold mb-2">Propensity Model Training</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Random State</label>
+                        <input type="number" id="training-random-state" value="42" class="w-full p-2 border rounded">
+                    </div>
+                    <button onclick="startTraining()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Start Training
+                    </button>
+                </div>
+
+                <!-- Outreach Generation -->
+                <div class="mb-6 p-4 border rounded">
+                    <h3 class="font-semibold mb-2">Personalized Outreach</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sample Size</label>
+                            <input type="number" id="sample-size" value="10" min="1" max="100" class="w-full p-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Use LLM</label>
+                            <select id="use-llm" class="w-full p-2 border rounded">
+                                <option value="false">No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">LLM Model</label>
+                            <select id="llm-model" class="w-full p-2 border rounded">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="gpt-4">GPT-4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="startOutreach()" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                        Generate Outreach
+                    </button>
+                </div>
+
+                <!-- Full Pipeline -->
+                <div class="p-4 border rounded bg-gray-50">
+                    <h3 class="font-semibold mb-2">Full Pipeline</h3>
+                    <p class="text-sm text-gray-600 mb-4">Run the complete analysis pipeline (clustering → training → explanation → summarization → outreach)</p>
+                    <button onclick="startFullPipeline()" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
+                        Start Full Pipeline
+                    </button>
+                </div>
+            </section>
+
+            <!-- Job Status -->
+            <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Job Status</h2>
+                <button onclick="refreshJobs()" class="mb-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                    Refresh Jobs
+                </button>
+                <div id="jobs-list" class="space-y-4">
+                    <p class="text-gray-500">No jobs running</p>
+                </div>
+            </section>
+
+            <!-- Results -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Results</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <button onclick="loadResults('clustering')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Load Clustering Results
+                    </button>
+                    <button onclick="loadResults('propensity')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Load Propensity Results
+                    </button>
+                    <button onclick="loadResults('outreach')" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                        Load Outreach Results
+                    </button>
+                </div>
+                <div id="results-container" class="mt-4">
+                    <p class="text-gray-500">Click a button above to load results</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiStatus();
+            setInterval(checkApiStatus, 30000); // Check every 30 seconds
+            setInterval(refreshJobs, 10000); // Refresh jobs every 10 seconds
+        });
+
+        // API Status
+        async function checkApiStatus() {
+            try {
+                const response = await axios.get(`${API_BASE}/health`);
+                document.getElementById('api-status').textContent = 'Online';
+                document.getElementById('api-status').className = 'text-green-600';
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Offline';
+                document.getElementById('api-status').className = 'text-red-600';
+            }
+        }
+
+        // Data Upload
+        async function uploadData() {
+            const formData = new FormData();
+            const files = {
+                'customer_profile': document.getElementById('customer-profile').files[0],
+                'insurance_products': document.getElementById('insurance-products').files[0],
+                'transactions': document.getElementById('transactions').files[0],
+                'customer_events': document.getElementById('customer-events').files[0]
+            };
+
+            for (const [key, file] of Object.entries(files)) {
+                if (file) {
+                    formData.append(key, file);
+                }
+            }
+
+            try {
+                document.getElementById('upload-status').innerHTML = '<span class="text-blue-600">Uploading...</span>';
+                const response = await axios.post(`${API_BASE}/upload-data`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                document.getElementById('upload-status').innerHTML = 
+                    `<span class="text-green-600">Upload successful: ${response.data.message}</span>`;
+            } catch (error) {
+                document.getElementById('upload-status').innerHTML = 
+                    `<span class="text-red-600">Upload failed: ${error.response?.data?.detail || error.message}</span>`;
+            }
+        }
+
+        // Analysis Functions
+        async function startClustering() {
+            const request = {
+                k_min: parseInt(document.getElementById('k-min').value),
+                k_max: parseInt(document.getElementById('k-max').value),
+                random_state: parseInt(document.getElementById('random-state').value)
+            };
+
+            try {
+                const response = await axios.post(`${API_BASE}/clustering/start`, request);
+                showNotification('Clustering started', 'success');
+                refreshJobs();
+            } catch (error) {
+                showNotification(`Failed to start clustering: ${error.response?.data?.detail || error.message}`, 'error');
+            }
+        }
+
+        async function startTraining() {
+            const request = {
+                random_state: parseInt(document.getElementById('training-random-state').value)
+            };
+
+            try {
+                const response = await axios.post(`${API_BASE}/training/start`, request);
+                showNotification('Model training started', 'success');
+                refreshJobs();
+            } catch (error) {
+                showNotification(`Failed to start training: ${error.response?.data?.detail || error.message}`, 'error');
+            }
+        }
+
+        async function startOutreach() {
+            const request = {
+                sample_size: parseInt(document.getElementById('sample-size').value),
+                use_llm: document.getElementById('use-llm').value === 'true',
+                model: document.getElementById('llm-model').value
+            };
+
+            try {
+                const response = await axios.post(`${API_BASE}/outreach/start`, request);
+                showNotification('Outreach generation started', 'success');
+                refreshJobs();
+            } catch (error) {
+                showNotification(`Failed to start outreach: ${error.response?.data?.detail || error.message}`, 'error');
+            }
+        }
+
+        async function startFullPipeline() {
+            const request = {
+                clustering_request: {
+                    k_min: parseInt(document.getElementById('k-min').value),
+                    k_max: parseInt(document.getElementById('k-max').value),
+                    random_state: parseInt(document.getElementById('random-state').value)
+                },
+                training_request: {
+                    random_state: parseInt(document.getElementById('training-random-state').value)
+                },
+                outreach_request: {
+                    sample_size: parseInt(document.getElementById('sample-size').value),
+                    use_llm: document.getElementById('use-llm').value === 'true',
+                    model: document.getElementById('llm-model').value
+                }
+            };
+
+            try {
+                const response = await axios.post(`${API_BASE}/pipeline/start`, request);
+                showNotification('Full pipeline started', 'success');
+                refreshJobs();
+            } catch (error) {
+                showNotification(`Failed to start pipeline: ${error.response?.data?.detail || error.message}`, 'error');
+            }
+        }
+
+        // Job Management
+        async function refreshJobs() {
+            try {
+                const response = await axios.get(`${API_BASE}/jobs`);
+                const jobs = response.data;
+                const jobsList = document.getElementById('jobs-list');
+                
+                if (jobs.length === 0) {
+                    jobsList.innerHTML = '<p class="text-gray-500">No jobs found</p>';
+                    document.getElementById('active-jobs').textContent = '0';
+                } else {
+                    const activeJobs = jobs.filter(job => job.status === 'running' || job.status === 'pending');
+                    document.getElementById('active-jobs').textContent = activeJobs.length;
+                    
+                    jobsList.innerHTML = jobs.map(job => `
+                        <div class="border rounded p-4 ${job.status === 'failed' ? 'border-red-300 bg-red-50' : job.status === 'completed' ? 'border-green-300 bg-green-50' : 'border-blue-300 bg-blue-50'}">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold">Job ID: ${job.job_id.substring(0, 8)}...</h4>
+                                    <p class="text-sm text-gray-600">${job.message || 'No message'}</p>
+                                    ${job.progress !== null ? `<div class="w-full bg-gray-200 rounded-full h-2 mt-2"><div class="bg-blue-600 h-2 rounded-full" style="width: ${job.progress * 100}%"></div></div>` : ''}
+                                    ${job.error ? `<p class="text-sm text-red-600 mt-2">Error: ${job.error}</p>` : ''}
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs rounded ${job.status === 'failed' ? 'bg-red-100 text-red-800' : job.status === 'completed' ? 'bg-green-100 text-green-800' : job.status === 'running' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${job.status}
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">${new Date(job.updated_at).toLocaleTimeString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Failed to refresh jobs:', error);
+            }
+        }
+
+        // Results
+        async function loadResults(type) {
+            try {
+                const response = await axios.get(`${API_BASE}/results/${type}`);
+                const results = response.data.data;
+                const container = document.getElementById('results-container');
+                
+                if (Object.keys(results).length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No results available</p>';
+                    return;
+                }
+
+                let html = `<h3 class="font-semibold mb-4 capitalize">${type} Results</h3>`;
+                
+                for (const [key, value] of Object.entries(results)) {
+                    html += `
+                        <div class="mb-6">
+                            <h4 class="font-medium mb-2">${key.replace(/_/g, ' ')}</h4>
+                            <div class="bg-gray-50 p-4 rounded overflow-x-auto">
+                                ${formatResults(value)}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = html;
+            } catch (error) {
+                document.getElementById('results-container').innerHTML = 
+                    `<p class="text-red-600">Failed to load results: ${error.response?.data?.detail || error.message}</p>`;
+            }
+        }
+
+        function formatResults(data) {
+            if (!data || data.length === 0) {
+                return '<p class="text-gray-500">No data available</p>';
+            }
+            
+            if (Array.isArray(data)) {
+                const headers = Object.keys(data[0]);
+                const tableHtml = `
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                ${headers.map(header => `<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">${header}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${data.slice(0, 10).map(row => `
+                                <tr>
+                                    ${headers.map(header => `<td class="px-4 py-2 text-sm text-gray-900">${row[header] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${data.length > 10 ? `<p class="text-sm text-gray-500 mt-2">Showing first 10 of ${data.length} records</p>` : ''}
+                `;
+                return tableHtml;
+            }
+            
+            return `<pre class="text-sm">${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        // Notifications
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
