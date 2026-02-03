@@ -222,6 +222,8 @@ class ApiService {
       sent_date: new Date().toISOString()
     }));
 
+    console.log('Updated emails with Email Sent status:', updatedEmails[0]);
+
     return {
       ...result,
       emails: updatedEmails

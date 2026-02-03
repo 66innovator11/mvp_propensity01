@@ -32,6 +32,8 @@ const ReviewEmailsPage: React.FC = () => {
   const [selectedEmail, setSelectedEmail] = useState<EmailDraft | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSendingEmails, setIsSendingEmails] = useState(false);
+  const [emailsSent, setEmailsSent] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const loadEmails = async () => {
@@ -91,9 +93,21 @@ const ReviewEmailsPage: React.FC = () => {
       
       console.log(`Successfully sent ${response.total_emails} emails`);
       console.log('Updated emails:', response.emails[0]); // Log first email to check status
+      console.log('First email status:', response.emails[0].status); // Check status specifically
       
       // Update the emails list with new status
       setEmails(response.emails);
+      setEmailsSent(true); // Set emails sent state
+      
+      // Force a re-render by updating the key
+      setForceUpdate(prev => prev + 1);
+      console.log('Emails state updated, forcing re-render');
+      
+      // Additional force update after a short delay
+      setTimeout(() => {
+        setForceUpdate(prev => prev + 1);
+        console.log('Additional force update applied');
+      }, 100);
       
       alert(`Successfully sent ${response.total_emails} emails to customers!`);
       
@@ -182,14 +196,14 @@ const ReviewEmailsPage: React.FC = () => {
             size="large"
             startIcon={<Email />}
             onClick={handleSendEmails}
-            disabled={isSendingEmails}
+            disabled={isSendingEmails || emailsSent}
             sx={{ mb: 3 }}
           >
-            {isSendingEmails ? 'Sending Emails...' : 'Click here to send emails to customers'}
+            {isSendingEmails ? 'Sending Emails...' : emailsSent ? 'All Emails Sent' : 'Click here to send emails to customers'}
           </Button>
         </Box>
 
-        <TableContainer component={Paper} sx={{ boxShadow: 3 }} key={emails.length}>
+        <TableContainer component={Paper} sx={{ boxShadow: 3 }} key={`${emails.length}-${forceUpdate}-${Date.now()}`}>
           <Table sx={{ minWidth: 800 }} aria-label="email review table">
             <TableHead sx={{ bgcolor: 'primary.main' }}>
               <TableRow>
@@ -203,10 +217,10 @@ const ReviewEmailsPage: React.FC = () => {
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {emails.map((email) => (
+            <TableBody key={`tbody-${forceUpdate}`}>
+              {emails.map((email, index) => (
                 <TableRow
-                  key={email.customer_id}
+                  key={`${email.customer_id}-${forceUpdate}`}
                   sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}
                 >
                   <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
